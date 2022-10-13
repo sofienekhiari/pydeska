@@ -1,15 +1,20 @@
+import os
 from aqt import mw
 from aqt.deckbrowser import DeckBrowser
 from aqt.utils import qconnect
 from aqt.qt import *
 from anki.decks import DeckManager
 
+def load_sk_style():
+    qss_file_name = os.getcwd() + "/skqss"
+    with open(qss_file_name, "r") as qss_file:
+        return qss_file.read()
 
 class AddMultipleDecks(QMainWindow):
     def __init__(self):
         super().__init__(mw)
         self.setWindowTitle("Add multiple decks")
-        self.setGeometry(100, 100, 400, 100)
+        self.setGeometry(100, 100, 500, 400)
         self.pd_label = QLabel("Parent deck:")
         self.pd_text = QLineEdit()
         self.pd_text.setToolTip("Leave empty if you don't need one")
@@ -26,6 +31,7 @@ class AddMultipleDecks(QMainWindow):
         layout.addWidget(self.amd_submit_button, alignment=Qt.AlignmentFlag.AlignRight)
         amd_window_central_widget = QWidget()
         amd_window_central_widget.setLayout(layout)
+        amd_window_central_widget.setStyleSheet(load_sk_style())
         self.setCentralWidget(amd_window_central_widget)
 
     def add_multiple_decks(self):
