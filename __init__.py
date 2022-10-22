@@ -9,20 +9,20 @@ from aqt.utils import qconnect
 from aqt.qt import *
 
 
-class SkaaSt(QMainWindow):
+class PydeskaSt(QMainWindow):
     """Main window class"""
 
     def __init__(self):
         super().__init__(mw)
         # Set the basic window properties
-        self.setWindowTitle("SKAA")
+        self.setWindowTitle("Pydeska")
         self.setGeometry(100, 100, 500, 400)
         # Set the process to be None
         self.st_process = None
         # Create basic widgets
-        self.start_btn = QPushButton("Start addon server")
-        self.start_btn.pressed.connect(self.start_skaa_st)
-        self.stop_btn = QPushButton("Stop addon server")
+        self.start_btn = QPushButton("Start Pydeska Server")
+        self.start_btn.pressed.connect(self.start_pydeska_st)
+        self.stop_btn = QPushButton("Stop Pydeska Server")
         self.stop_btn.pressed.connect(self.stop_st_server)
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
@@ -42,14 +42,14 @@ class SkaaSt(QMainWindow):
         """Helper function that adds the message to the output widget"""
         self.output.appendPlainText(message)
 
-    def start_skaa_st(self):
+    def start_pydeska_st(self):
         """Function that starts the st server"""
         # Check if there is a process already running
         if self.st_process is None:
             # Notify that a process is starting
-            self.write_output("Starting local addon server...")
+            self.write_output("Starting local pydeska server...")
             # Locate the entry file to execute
-            st_home_file_name = mw.addonManager.addonsFolder() + "/skaa/home.py"
+            st_home_file_name = mw.addonManager.addonsFolder() + "/pydeska/home.py"
             # Create the process handler
             self.st_process = QProcess()
             # Connect the handler to the output function
@@ -75,15 +75,15 @@ class SkaaSt(QMainWindow):
         self.st_process.terminate()
 
 
-def show_skaa_st_window():
+def show_pydeska_st_window():
     """Function that shows the main window"""
-    skaa_st_main_window = SkaaSt()
-    skaa_st_main_window.show()
+    pydeska_st_main_window = PydeskaSt()
+    pydeska_st_main_window.show()
 
 
 # Create an action item
-skaa_st_action = QAction("SKAA Addon", mw)
+pydeska_st_action = QAction("Pydeska", mw)
 # Attach the menu item to the appropriate function
-qconnect(skaa_st_action.triggered, show_skaa_st_window)
+qconnect(pydeska_st_action.triggered, show_pydeska_st_window)
 # Create a menu item
-mw.form.menuTools.addAction(skaa_st_action)
+mw.form.menuTools.addAction(pydeska_st_action)
