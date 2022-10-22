@@ -7,6 +7,7 @@ it's needed
 from aqt import mw
 from aqt.utils import qconnect
 from aqt.qt import *
+import re
 
 
 class PydeskaSt(QMainWindow):
@@ -61,8 +62,12 @@ class PydeskaSt(QMainWindow):
 
     def handle_output(self):
         """Function that handles the output"""
+        # Get and convert the data
         data = self.st_process.readAllStandardOutput()
         stdout = bytes(data).decode("utf8")
+        # Add a customised welcome message if needed
+        stdout += self.custom_welcome_message(stdout)
+        # Write the stdout
         self.write_output(stdout)
 
     def process_finished(self):
@@ -73,6 +78,22 @@ class PydeskaSt(QMainWindow):
     def stop_st_server(self):
         """Function that terminates the process"""
         self.st_process.terminate()
+
+    def custom_welcome_message(self, stdout):
+        """Function that generates and prints a custom welcome message"""
+        last_url = re.findall(r"Local URL: (.+)", stdout)
+        if len(last_url):
+            return f"""
+            
+            ヽ(•‿•)ノ Welcome to Pydeska!
+            The server should start the default browser
+            and open the addon right away. Please wait for
+            few seconds. If nothing happens, please open
+            the following link in your default browser.
+            ↣ {last_url[0]}
+            Enjoy!
+            """
+        return ""
 
 
 def show_pydeska_st_window():
