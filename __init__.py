@@ -1,59 +1,89 @@
-import os
+"""
+Basic layout to control the server execution
+and output the stdout to the user in case
+it's needed
+"""
+
 from aqt import mw
-from aqt.deckbrowser import DeckBrowser
 from aqt.utils import qconnect
 from aqt.qt import *
-from anki.decks import DeckManager
 
-def load_sk_style():
-    qss_file_name = os.getcwd() + "/skqss"
-    with open(qss_file_name, "r") as qss_file:
-        return qss_file.read()
 
-class AddMultipleDecks(QMainWindow):
+class SkaaSt(QMainWindow):
+    """Main window class"""
+
     def __init__(self):
         super().__init__(mw)
-        self.setWindowTitle("Add multiple decks")
+        # Set the basic window properties
+        self.setWindowTitle("SKAA")
         self.setGeometry(100, 100, 500, 400)
-        self.pd_label = QLabel("Parent deck:")
-        self.pd_text = QLineEdit()
-        self.pd_text.setToolTip("Leave empty if you don't need one")
-        self.cd_label = QLabel("Children decks:")
-        self.cd_text = QTextEdit()
-        self.cd_text.setToolTip("Add every deck title on a different line")
-        self.amd_submit_button = QPushButton("Create")
-        self.amd_submit_button.clicked.connect(self.add_multiple_decks)
-        layout = QVBoxLayout()
-        layout.addWidget(self.pd_label)
-        layout.addWidget(self.pd_text)
-        layout.addWidget(self.cd_label)
-        layout.addWidget(self.cd_text)
-        layout.addWidget(self.amd_submit_button, alignment=Qt.AlignmentFlag.AlignRight)
-        amd_window_central_widget = QWidget()
-        amd_window_central_widget.setLayout(layout)
-        amd_window_central_widget.setStyleSheet(load_sk_style())
-        self.setCentralWidget(amd_window_central_widget)
+        # Set the process to be None
+        self.st_process = None
+        # Create basic widgets
+        self.start_btn = QPushButton("Start addon server")
+        self.start_btn.pressed.connect(self.start_skaa_st)
+        self.stop_btn = QPushButton("Stop addon server")
+        self.stop_btn.pressed.connect(self.stop_st_server)
+        self.output = QPlainTextEdit()
+        self.output.setReadOnly(True)
+        # Create layout(s)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.start_btn)
+        btn_layout.addWidget(self.stop_btn)
+        global_layout = QVBoxLayout()
+        global_layout.addLayout(btn_layout)
+        global_layout.addWidget(self.output)
+        # Add layouts to the main window
+        central_widget = QWidget()
+        central_widget.setLayout(global_layout)
+        self.setCentralWidget(central_widget)
 
-    def add_multiple_decks(self):
-        pd_text = self.pd_text.text()
-        cd_original_list = self.cd_text.toPlainText().split("\n")
-        cd_list = [
-            cd_text if pd_text == "" else pd_text + "::" + cd_text
-            for cd_text in cd_original_list
-        ]
-        amd_browser = DeckBrowser(mw)
-        amd_manager = DeckManager(mw.col)
-        for cd_deck in cd_list:
-            amd_manager.add_normal_deck_with_name(cd_deck)
-        amd_browser.refresh()
-        self.hide()
+    def write_output(self, message):
+        """Helper function that adds the message to the output widget"""
+        self.output.appendPlainText(message)
+
+    def start_skaa_st(self):
+        """Function that starts the st server"""
+        # Check if there is a process already running
+        if self.st_process is None:
+            # Notify that a process is starting
+            self.write_output("Starting local addon server...")
+            # Locate the entry file to execute
+            st_home_file_name = mw.addonManager.addonsFolder() + "/skaa/home.py"
+            # Create the process handler
+            self.st_process = QProcess()
+            # Connect the handler to the output function
+            self.st_process.readyReadStandardOutput.connect(self.handle_output)
+            # Connect the handler to the cleanup function
+            self.st_process.finished.connect(self.process_finished)
+            # Start the server
+            self.st_process.start("streamlit", ["run", st_home_file_name])
+
+    def handle_output(self):
+        """Function that handles the output"""
+        data = self.st_process.readAllStandardOutput()
+        stdout = bytes(data).decode("utf8")
+        self.write_output(stdout)
+
+    def process_finished(self):
+        """Function that handles the process when it's finished"""
+        self.write_output("Server shut down.")
+        self.st_process = None
+
+    def stop_st_server(self):
+        """Function that terminates the process"""
+        self.st_process.terminate()
 
 
-def add_multiple_decks_window():
-    amd_window = AddMultipleDecks()
-    amd_window.show()
+def show_skaa_st_window():
+    """Function that shows the main window"""
+    skaa_st_main_window = SkaaSt()
+    skaa_st_main_window.show()
 
 
-amd_action = QAction("Add multiple decks", mw)
-qconnect(amd_action.triggered, add_multiple_decks_window)
-mw.form.menuTools.addAction(amd_action)
+# Create an action item
+skaa_st_action = QAction("SKAA Addon", mw)
+# Attach the menu item to the appropriate function
+qconnect(skaa_st_action.triggered, show_skaa_st_window)
+# Create a menu item
+mw.form.menuTools.addAction(skaa_st_action)
