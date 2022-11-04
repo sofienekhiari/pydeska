@@ -28,7 +28,7 @@ class PydeskaSt(QMainWindow):
         super().__init__(mw)
         # Set the basic window properties
         self.setWindowTitle("Pydeska")
-        self.setGeometry(100, 100, 500, 400)
+        self.setGeometry(100, 100, 500, 600)
         # Set the process to be None
         self.st_process = None
         # Create basic widgets
