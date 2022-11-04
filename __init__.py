@@ -1,13 +1,24 @@
+# pylint: disable=no-name-in-module
+
 """
 Basic layout to control the server execution
 and output the stdout to the user in case
 it's needed
 """
 
+import re
 from aqt import mw
 from aqt.utils import qconnect
-from aqt.qt import *
-import re
+from aqt.qt import (
+    QWidget,
+    QMainWindow,
+    QPushButton,
+    QPlainTextEdit,
+    QHBoxLayout,
+    QVBoxLayout,
+    QProcess,
+    QAction,
+)
 
 
 class PydeskaSt(QMainWindow):
